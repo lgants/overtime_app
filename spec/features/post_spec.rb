@@ -8,14 +8,24 @@ describe 'navigate' do
   end
 
   describe 'index' do
-    it 'can be reached successfully' do
+    before do
       visit posts_path
+    end
+
+    it 'can be reached successfully' do
       expect(page.status_code).to eq(200)
     end
 
     it 'it has a title of Posts' do
-      visit posts_path
       expect(page).to have_content(/Posts/)
+    end
+
+    it 'it has a list of Posts' do
+      Post.create(date: Date.today, rationale: "test1")
+      Post.create(date: Date.today, rationale: "test2")
+      # need to rerun this because when it first loads in do block test content won't be populated
+      visit posts_path
+      expect(/test1|test2/)
     end
   end
 
