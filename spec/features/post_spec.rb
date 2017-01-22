@@ -2,8 +2,8 @@ require 'rails_helper'
 
 describe 'navigate' do
   before do
-    user = User.create(first_name: "Jon", last_name: "Doe", email: "test@test.com", password: "password", password_confirmation: "password")
-    login_as(user, :scope => :user)
+    @user = FactoryGirl.create(:user)
+    login_as(@user, :scope => :user)
     visit new_post_path
   end
 
@@ -21,11 +21,11 @@ describe 'navigate' do
     end
 
     it 'it has a list of Posts' do
-      Post.create(date: Date.today, rationale: "test1")
-      Post.create(date: Date.today, rationale: "test2")
+      FactoryGirl.build_stubbed(:post)
+      FactoryGirl.build_stubbed(:second_post)
       # need to rerun this because when it first loads in do block test content won't be populated
       visit posts_path
-      expect(/test1|test2/)
+      expect(/rationale|content/)
     end
   end
 
@@ -48,5 +48,28 @@ describe 'navigate' do
 
       expect(User.last.posts.last.rationale).to eq("user association")
     end
+
+    describe 'edit' do
+      before do
+        @post = FactoryGirl.create(:post)
+      end
+
+      it 'can be reached by clicking edit on index page' do
+        visit posts_path
+
+        click_link("edit_#{@post.id}")
+        expect(page.status_code).to eq(200)
+      end
+
+      it 'can be edited' do
+        visit edit_post_path(@post)
+
+        fill_in 'post[date]', with: Date.today
+        fill_in 'post[rationale]', with: "Edited content"
+        click_on "Save"
+
+        expect(page).to have_content("Edited content")
+      end
+    end 
   end
 end
