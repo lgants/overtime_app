@@ -10,6 +10,8 @@ class PostsController < ApplicationController
 
   def create
     @post = Post.new(post_params)
+    @post.user_id = current_user.id
+
     if @post.save
       # redirect_to action necessary to prevent rails from automatically attempting a redirect to a create template
       # redirect_to @post redirects to the post show page
