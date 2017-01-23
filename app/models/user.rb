@@ -6,6 +6,13 @@ class User < ApplicationRecord
 
   validates_presence_of :first_name, :last_name, :phone
 
+  # despite valid syntax, use of ^ and $ create a security risk in Rails; Rails provides special helpers to substitute
+  # PHONE_REGEX = /^[0-9]*/
+  PHONE_REGEX = /\A[0-9]*\Z/
+
+  validates_format_of :phone, with: PHONE_REGEX
+  validates :phone, length: { is: 10 }
+
   def full_name
     last_name.upcase + ", " + first_name.upcase
   end
