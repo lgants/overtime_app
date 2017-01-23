@@ -4,7 +4,6 @@ describe 'navigate' do
   before do
     @user = FactoryGirl.create(:user)
     login_as(@user, :scope => :user)
-    visit new_post_path
   end
 
   describe 'index' do
@@ -12,20 +11,20 @@ describe 'navigate' do
       visit posts_path
     end
 
-    it 'can be reached successfully' do
-      expect(page.status_code).to eq(200)
-    end
+  	it 'can be reached successfully' do
+  		expect(page.status_code).to eq(200)
+  	end
 
-    it 'it has a title of Posts' do
-      expect(page).to have_content(/Posts/)
-    end
+  	it 'has a title of Posts' do
+  		expect(page).to have_content(/Posts/)
+  	end
 
-    it 'it has a list of Posts' do
+    it 'has a list of posts' do
       FactoryGirl.build_stubbed(:post)
       FactoryGirl.build_stubbed(:second_post)
       # need to rerun this because when it first loads in do block test content won't be populated
       visit posts_path
-      expect(/rationale|content/)
+      expect(page).to have_content(/Rationale|content/)
     end
   end
 
@@ -49,50 +48,56 @@ describe 'navigate' do
   end
 
   describe 'creation' do
+  	before do
+  		visit new_post_path
+  	end
+
+  	it 'has a new form that can be reached' do
+  		expect(page.status_code).to eq(200)
+  	end
+
+  	it 'can be created from new form page' do
+      fill_in 'post[date]', with: Date.today
+      fill_in 'post[rationale]', with: "Some rationale"
+      click_on "Save"
+
+      expect(page).to have_content("Some rationale")
+  	end
+
+    it 'will have a user associated it' do
+      fill_in 'post[date]', with: Date.today
+      fill_in 'post[rationale]', with: "User Association"
+      click_on "Save"
+
+      expect(User.last.posts.last.rationale).to eq("User Association")
+    end
+  end
+
+  describe 'edit' do
     before do
-      visit new_post_path
+      @edit_user = User.create(first_name: "asdf", last_name: "asdf", email: "asdfasdf@asdf.com", password: "asdfasdf", password_confirmation: "asdfasdf")
+      login_as(@edit_user, :scope => :user)
+      @edit_post = Post.create(date: Date.today, rationale: "asdf", user_id: @edit_user.id)
     end
 
-    it 'has a new form that can be reached' do
-      expect(page.status_code).to eq(200)
-    end
+    it 'can be edited' do
+      visit edit_post_path(@edit_post)
 
-    it 'can be created from new form page' do
       fill_in 'post[date]', with: Date.today
-      fill_in 'post[rationale]', with: "test rationale"
-      click_on "Save"
-      expect(page).to have_content("test rationale")
-    end
-
-    it 'will have a user associated with it' do
-      fill_in 'post[date]', with: Date.today
-      fill_in 'post[rationale]', with: "user association"
+      fill_in 'post[rationale]', with: "Edited content"
       click_on "Save"
 
-      expect(User.last.posts.last.rationale).to eq("user association")
+      expect(page).to have_content("Edited content")
     end
 
-    describe 'edit' do
-      before do
-        @post = FactoryGirl.create(:post)
-      end
+    it 'cannot be edited by a non authorized user' do
+      logout(:user)
+      non_authorized_user = FactoryGirl.create(:non_authorized_user)
+      login_as(non_authorized_user, :scope => :user)
 
-      it 'can be reached by clicking edit on index page' do
-        visit posts_path
+      visit edit_post_path(@edit_post)
 
-        click_link("edit_#{@post.id}")
-        expect(page.status_code).to eq(200)
-      end
-
-      it 'can be edited' do
-        visit edit_post_path(@post)
-
-        fill_in 'post[date]', with: Date.today
-        fill_in 'post[rationale]', with: "Edited content"
-        click_on "Save"
-
-        expect(page).to have_content("Edited content")
-      end
+      expect(current_path).to eq(root_path)
     end
   end
 end
