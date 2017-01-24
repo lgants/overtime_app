@@ -2,7 +2,9 @@ class PostsController < ApplicationController
   before_action :set_post, only: [:show, :edit, :update, :destroy]
 
   def index
-    @posts = Post.posts_by current_user
+    # @posts = Post.posts_by current_user
+    # added parantheses to chain new method
+    @posts = Post.posts_by(current_user).page(params[:page]).per(10)
     # @posts = Post.all
   end
 
