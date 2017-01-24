@@ -22,9 +22,12 @@
 			<th></th>
 		</tr>
 	</thead>
-	<tbody>
+	<tbody id="audit_logs">
 		<%= render @audit_logs %>
 	</tbody>
 </table>
 
-<%= paginate @audit_logs %>
+<!-- 'remote: true' tells rails that an outside or API call is being made, so don't render a new page - this provides access to index.js.erb -->
+<div id="paginator">
+  <%= paginate @audit_logs, remote: true %>
+</div>
