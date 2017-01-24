@@ -1,5 +1,5 @@
 class Post < ApplicationRecord
-  # enum allows you to dynamically create methods created based on the contents of the object
+  # enum allows you to dynamically create methods created based on the contents of the object (e.g. calling @post.approved! will set the status of the post instance to 1 and emit any notifications)
   enum status: { submitted: 0, approved: 1, rejected: 2 }
   belongs_to :user
   validates_presence_of :date, :rationale, :overtime_request
