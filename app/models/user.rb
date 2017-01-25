@@ -9,7 +9,7 @@ class User < ApplicationRecord
 
   devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :validatable
 
-  validates_presence_of :first_name, :last_name, :phone
+  validates_presence_of :first_name, :last_name, :phone, :ssn, :company
 
   # despite valid syntax, use of ^ and $ create a security risk in Rails; Rails provides special helpers to substitute
   # PHONE_REGEX = /^[0-9]*/
@@ -17,6 +17,8 @@ class User < ApplicationRecord
 
   validates_format_of :phone, with: PHONE_REGEX
   validates :phone, length: { is: 10 }
+  validates :ssn, length: { is: 4 }
+  validates_numericality_of :ssn
 
   def full_name
     last_name.upcase + ", " + first_name.upcase
